@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "categoria": "Doramas",
+    "nome": "Beleza Verdadeira",
+    "capa": "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=Beleza+Verdadeira",
+    "ano": 2020,
+    "pais": "Coreia do Sul",
+    "generos": ["Romance", "Comédia", "Drama"],
+    "temporadas": 1,
+    "episodios": 16,
+    "audio": "Português",
+    "qualidade": "1080p",
+    "sinopse": "Uma garota insegura usa maquiagem para esconder o rosto e se torna popular, mas acaba envolvida em um triângulo amoroso.",
+    "link_telegram": "https://t.me/+SEULINK",
+    "status": "Completo"
+  },
+  {
+    "id": 2,
+    "categoria": "Séries",
+    "nome": "Round 6",
+    "capa": "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=Round+6",
+    "ano": 2021,
+    "pais": "Coreia do Sul",
+    "generos": ["Suspense", "Ação", "Drama"],
+    "temporadas": 1,
+    "episodios": 9,
+    "audio": "Coreano",
+    "qualidade": "4K",
+    "sinopse": "Centenas de pessoas endividadas aceitam um convite misterioso para competir em jogos infantis.",
+    "link_telegram": "https://t.me/+SEULINK",
+    "status": "Completo"
+  }
+]Adicionando dados iniciais
