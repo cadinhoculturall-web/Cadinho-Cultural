@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadinho Cultural - Catálogo</title>
+    <style>
+        /* ========== ESTILOS (TEMA ESCURO NETFLIX) ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f0f0f;
+            color: #fff;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e50914;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+        }
+        .logo span {
+            color: #fff;
+        }
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+        .search-box input::placeholder {
+            color: #888;
+        }
+        .search-box button {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            background-color: #e50914;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .search-box button:hover {
+            background-color: #f40612;
+        }
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .filtros button {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid #444;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filtros button:hover, .filtros button.ativo {
+            background: #e50914;
+            border-color: #e50914;
+            color: #fff;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.4);
+        }
+        .card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            background: #2a2a2a;
+        }
+        .card-info {
+            padding: 12px;
+        }
+        .card-info h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-info p {
+            color: #aaa;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .tag {
+            display: inline-block;
+            background: #e50914;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal-conteudo {
+            background: #1a1a1a;
+            max-width: 600px;
+            width: 90%;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-conteudo .fechar {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #fff;
+        }
+        .modal-conteudo h2 {
+            color: #e50914;
+            margin-bottom: 10px;
+        }
+        .modal-conteudo .detalhe {
+            margin: 5px 0;
+            color: #ccc;
+        }
+        .modal-conteudo .detalhe strong {
+            color: #fff;
+        }
+        .modal-conteudo .sinopse {
+            margin: 15px 0;
+            line-height: 1.5;
+            color: #ddd;
+        }
+        .btn-telegram {
+            display: inline-block;
+            background: #0088cc;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        .btn-telegram:hover {
+            background: #006699;
+        }
+        .generos-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .generos-list span {
+            background: #333;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .logo { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <div class="header">
+        <div class="logo">Cadinho <span>Cultural</span></div>
+        <div class="search-box">
+            <input type="text" id="inputBusca" placeholder="Pesquise por nome, gênero, ano..." onkeyup="if(event.key === 'Enter') pesquisar()">
+            <button onclick="pesquisar()">Buscar</button>
+        </div>
+        <div class="filtros" id="filtrosCategoria">
+            <button onclick="filtrarCategoria('todos')" class="ativo">Todos</button>
+            <button onclick="filtrarCategoria('Doramas')">Doramas</button>
+            <button onclick="filtrarCategoria('Séries')">Séries</button>
+            <button onclick="filtrarCategoria('Filmes')">Filmes</button>
+            <button onclick="filtrarCategoria('Animes')">Animes</button>
+            <button onclick="filtrarCategoria('Livros')">Livros</button>
+        </div>
+    </div>
+
+    <!-- GRADE DE CARDS -->
+    <div class="grid" id="gridCards"></div>
+
+    <!-- MODAL (detalhes da obra) -->
+    <div class="modal" id="modalDetalhes">
+        <div class="modal-conteudo">
+            <span class="fechar" onclick="fecharModal()">&times;</span>
+            <h2 id="modalTitulo"></h2>
+            <img id="modalCapa" src="" alt="Capa" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px; margin:10px 0;">
+            <div id="modalInfo" class="detalhe"></div>
+            <div id="modalGeneros" class="generos-list"></div>
+            <p id="modalSinopse" class="sinopse"></p>
+            <a id="modalLink" href="#" target="_blank" class="btn-telegram">▶ Assistir / Baixar no Telegram</a>
+        </div>
+    </div>
+
+    <script>
+        // ========== JAVASCRIPT ==========
+        let dados = [];
+        let categoriaAtual = 'todos';
+
+        // Carregar o arquivo JSON
+        fetch('dados.json')
+            .then(resposta => {
+                if (!resposta.ok) throw new Error('Arquivo dados.json não encontrado!');
+                return resposta.json();
+            })
+            .then(dadosCarregados => {
+                dados = dadosCarregados;
+                exibirCards(dados);
+            })
+            .catch(erro => {
+                document.getElementById('gridCards').innerHTML = `<p style="color:red; text-align:center; width:100%;">Erro ao carregar dados: ${erro.message}. Verifique se o arquivo dados.json existe.</p>`;
+                console.error(erro);
+            });
+
+        function exibirCards(lista) {
+            const grid = document.getElementById('gridCards');
+            if (lista.length === 0) {
+                grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; font-size:1.5rem;">Nenhuma obra encontrada 😕</p>';
+                return;
+            }
+            grid.innerHTML = lista.map(item => `
+                <div class="card" onclick="abrirDetalhes(${item.id})">
+                    <img src="${item.capa}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/300x450/333/fff?text=Sem+Capa'">
+                    <div class="card-info">
+                        <h3>${item.nome}</h3>
+                        <p><span>${item.ano}</span> <span class="tag">${item.categoria}</span></p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function pesquisar() {
+            const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
+            if (termo === '') {
+                aplicarFiltros();
+                return;
+            }
+            const resultados = dados.filter(item => {
+                const nomeMatch = item.nome.toLowerCase().includes(termo);
+                const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
+                const paisMatch = item.pais.toLowerCase().includes(termo);
+                const anoMatch = item.ano.toString().includes(termo);
+                return nomeMatch || generoMatch || paisMatch || anoMatch;
+            });
+            exibirCards(resultados);
+        }
+
+        function filtrarCategoria(categoria) {
+            categoriaAtual = categoria;
+            // Atualizar visual dos botões
+            document.querySelectorAll('#filtrosCategoria button').forEach(btn => btn.classList.remove('ativo'));
+            event.target.classList.add('ativo');
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            let listaFiltrada = dados;
+            if (categoriaAtual !== 'todos') {
+                listaFiltrada = dados.filter(item => item.categoria === categoriaAtual);
+            }
+            // Se houver texto na busca, aplica também
+            const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
+            if (termo !== '') {
+                listaFiltrada = listaFiltrada.filter(item => {
+                    const nomeMatch = item.nome.toLowerCase().includes(termo);
+                    const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
+                    const paisMatch = item.pais.toLowerCase().includes(termo);
+                    const anoMatch = item.ano.toString().includes(termo);
+                    return nomeMatch || generoMatch || paisMatch || anoMatch;
+                });
+            }
+            exibirCards(listaFiltrada);
+        }
+
+        function abrirDetalhes(id) {
+            const item = dados.find(d => d.id === id);
+            if (!item) return;
+            document.getElementById('modalTitulo').textContent = item.nome;
+            document.getElementById('modalCapa').src = item.capa;
+            document.getElementById('modalCapa').onerror = function() { this.src = 'https://via.placeholder.com/300x450/333/fff?text=Sem+Capa'; };
+            
+            let infoHTML = `
+                <p><strong>Ano:</strong> ${item.ano}</p>
+                <p><strong>País:</strong> ${item.pais}</p>
+                <p><strong>Temporadas:</strong> ${item.temporadas}</p>
+                <p><strong>Episódios:</strong> ${item.episodios}</p>
+                <p><strong>Áudio:</strong> ${item.audio}</p>
+                <p><strong>Qualidade:</strong> ${item.qualidade}</p>
+                <p><strong>Status:</strong> ${item.status}</p>
+            `;
+            document.getElementById('modalInfo').innerHTML = infoHTML;
+            
+            let generosHTML = item.generos.map(g => `<span>${g}</span>`).join('');
+            document.getElementById('modalGeneros').innerHTML = generosHTML;
+            
+            document.getElementById('modalSinopse').textContent = item.sinopse;
+            document.getElementById('modalLink').href = item.link_telegram;
+            
+            document.getElementById('modalDetalhes').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalDetalhes').style.display = 'none';
+        }
+
+        // Fechar modal clicando fora do conteúdo
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalDetalhes');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+    </script>
+</body>
+</html>
