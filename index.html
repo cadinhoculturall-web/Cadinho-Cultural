@@ -1,543 +1,176 @@
+<?php
+$is_logged_in = isset($_SESSION['email']);
+require_once "auth/Session.php";
+
+$s = new Session();
+
+if(isset($_POST['logout'])){
+  session_destroy();
+  header("location:index.php");
+  exit;
+}
+
+?>
+
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadinho Cultural - Catálogo</title>
-    <style>
-        /* ========== CORES E TEMA ========== */
-        :root {
-            --dourado: #d4a843;
-            --dourado-escuro: #b8922f;
-            --dourado-claro: #e8c96e;
-            --fundo: #0f0f0f;
-            --card: #1a1a1a;
-            --texto: #fff;
-            --texto-claro: #aaa;
-            --borda: #333;
-        }
-
-        /* ========== TEMA CLARO (detectado automaticamente) ========== */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --fundo: #f5f0e8;
-                --card: #ffffff;
-                --texto: #1a1a1a;
-                --texto-claro: #666;
-                --borda: #ddd;
-            }
-        }
-
-        /* ========== ESTILOS GERAIS ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--fundo);
-            color: var(--texto);
-            padding: 20px;
-            transition: background 0.3s, color 0.3s;
-            min-height: 100vh;
-        }
-
-        /* ========== CABEÇALHO ========== */
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            font-size: 2.8rem;
-            font-weight: bold;
-            color: var(--dourado);
-            text-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-        }
-        .logo span {
-            color: var(--texto);
-        }
-
-        /* ========== BARRA DE PESQUISA ========== */
-        .search-box {
-            width: 100%;
-            max-width: 550px;
-            display: flex;
-            gap: 10px;
-        }
-        .search-box input {
-            flex: 1;
-            padding: 14px 24px;
-            border-radius: 50px;
-            border: 2px solid var(--borda);
-            background-color: var(--card);
-            color: var(--texto);
-            font-size: 16px;
-            outline: none;
-            transition: 0.3s;
-        }
-        .search-box input:focus {
-            border-color: var(--dourado);
-            box-shadow: 0 0 15px rgba(212, 168, 67, 0.2);
-        }
-        .search-box input::placeholder {
-            color: var(--texto-claro);
-        }
-        .search-box button {
-            padding: 14px 30px;
-            border-radius: 50px;
-            border: none;
-            background: var(--dourado);
-            color: #1a1a1a;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .search-box button:hover {
-            background: var(--dourado-escuro);
-            transform: scale(1.03);
-        }
-
-        /* ========== FILTROS (CATEGORIAS) ========== */
-        .filtros {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 25px 0 10px;
-            justify-content: center;
-        }
-        .filtros button {
-            padding: 8px 22px;
-            border-radius: 30px;
-            border: 2px solid var(--borda);
-            background: transparent;
-            color: var(--texto-claro);
-            cursor: pointer;
-            font-weight: 500;
-            transition: 0.3s;
-            font-size: 0.95rem;
-        }
-        .filtros button:hover {
-            border-color: var(--dourado);
-            color: var(--texto);
-        }
-        .filtros button.ativo {
-            background: var(--dourado);
-            border-color: var(--dourado);
-            color: #1a1a1a;
-            font-weight: bold;
-        }
-
-        /* ========== GRADE DE CARDS ========== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* ========== CARD INDIVIDUAL ========== */
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
-            cursor: pointer;
-            border: 2px solid transparent;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--dourado);
-            box-shadow: 0 12px 35px rgba(212, 168, 67, 0.25);
-        }
-        .card img {
-            width: 100%;
-            height: 280px;
-            object-fit: cover;
-            background: var(--borda);
-        }
-        .card-info {
-            padding: 14px 16px;
-        }
-        .card-info h3 {
-            font-size: 1rem;
-            margin-bottom: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--texto);
-        }
-        .card-info p {
-            color: var(--texto-claro);
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .tag {
-            display: inline-block;
-            background: var(--dourado);
-            color: #1a1a1a;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        /* ========== MODAL (JANELA DE DETALHES) ========== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-            padding: 20px;
-        }
-        .modal-conteudo {
-            background: var(--card);
-            max-width: 600px;
-            width: 100%;
-            padding: 35px;
-            border-radius: 20px;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 2px solid var(--dourado);
-            box-shadow: 0 20px 60px rgba(212, 168, 67, 0.15);
-        }
-        /* Scroll bonito */
-        .modal-conteudo::-webkit-scrollbar {
-            width: 6px;
-        }
-        .modal-conteudo::-webkit-scrollbar-track {
-            background: var(--fundo);
-        }
-        .modal-conteudo::-webkit-scrollbar-thumb {
-            background: var(--dourado);
-            border-radius: 10px;
-        }
-
-        .modal-conteudo .fechar {
-            position: absolute;
-            top: 12px;
-            right: 22px;
-            font-size: 2.2rem;
-            cursor: pointer;
-            color: var(--texto);
-            transition: 0.3s;
-            line-height: 1;
-        }
-        .modal-conteudo .fechar:hover {
-            color: var(--dourado);
-            transform: rotate(90deg);
-        }
-        .modal-conteudo h2 {
-            color: var(--dourado);
-            margin-bottom: 12px;
-            font-size: 1.8rem;
-            padding-right: 30px;
-        }
-        .modal-conteudo .detalhe {
-            margin: 4px 0;
-            color: var(--texto-claro);
-            font-size: 0.95rem;
-        }
-        .modal-conteudo .detalhe strong {
-            color: var(--texto);
-        }
-        .modal-conteudo .sinopse {
-            margin: 15px 0 20px;
-            line-height: 1.6;
-            color: var(--texto-claro);
-        }
-        .btn-telegram {
-            display: inline-block;
-            background: var(--dourado);
-            color: #1a1a1a;
-            padding: 14px 32px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.05rem;
-            transition: 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-telegram:hover {
-            background: var(--dourado-escuro);
-            transform: scale(1.03);
-        }
-        .generos-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 10px 0 15px;
-        }
-        .generos-list span {
-            background: var(--fundo);
-            color: var(--texto);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            border: 1px solid var(--borda);
-        }
-
-        .modal-conteudo img {
-            width: 100%;
-            max-height: 280px;
-            object-fit: contain;
-            border-radius: 10px;
-            margin: 10px 0 15px;
-            background: var(--fundo);
-        }
-
-        /* ========== RESPONSIVO ========== */
-        @media (max-width: 600px) {
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 16px;
-            }
-            .logo {
-                font-size: 2rem;
-            }
-            .search-box input {
-                font-size: 14px;
-                padding: 12px 16px;
-            }
-            .search-box button {
-                padding: 12px 18px;
-                font-size: 14px;
-            }
-            .filtros button {
-                font-size: 0.8rem;
-                padding: 6px 14px;
-            }
-            .modal-conteudo {
-                padding: 20px;
-            }
-            .modal-conteudo h2 {
-                font-size: 1.4rem;
-            }
-            .card img {
-                height: 200px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 12px;
-            }
-            .card-info h3 {
-                font-size: 0.8rem;
-            }
-            .card-info p {
-                font-size: 0.7rem;
-            }
-            .tag {
-                font-size: 0.6rem;
-                padding: 1px 8px;
-            }
-        }
-
-        /* ========== MENSAGEM DE NENHUM RESULTADO ========== */
-        .sem-resultado {
-            color: var(--texto-claro);
-            text-align: center;
-            width: 100%;
-            font-size: 1.5rem;
-            padding: 50px 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CC Flix</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-
-    <!-- ===== CABEÇALHO ===== -->
-    <div class="header">
-        <div class="logo">Cadinho <span>Cultural</span></div>
-        <div class="search-box">
-            <input
-            type="text"
-            id="inputBusca"
-            placeholder="🔍 Pesquise por nome, gênero, ano..."
-            onkeyup="if(event.key === 'Enter') pesquisar()"
-            />
-            <button onclick="pesquisar()">Buscar</button>
-        </div>
-        <div class="filtros" id="filtrosCategoria">
-            <button onclick="filtrarCategoria('todos', this)" class="ativo">Todos</button>
-            <button onclick="filtrarCategoria('Séries', this)">Séries</button>
-            <button onclick="filtrarCategoria('Doramas', this)">Doramas</button>
-            <button onclick="filtrarCategoria('Filmes', this)">Filmes</button>
-            <button onclick="filtrarCategoria('Minisséries', this)">Minisséries</button>
-            <button onclick="filtrarCategoria('Novelas', this)">Novelas</button>
-            <button onclick="filtrarCategoria('Desenhos', this)">Desenhos</button>
-            <button onclick="filtrarCategoria('Animes', this)">Animes</button>
-        </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="#"><span class="logo-text">LABTIF Movie</span></a>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <nav class="nav-menu">
+        <a href="#">Home</a>
+        <a href="crud/index.php">Movies</a>
+        <a href="auth/loginForm.php" class="btn-login">Login</a>
+        <a href="auth/registerForm.php" class="btn-register">Register</a>
+        <form action="" method="post">
+          <button type="submit" name="logout" class="btn-logout">Logout</button>
+        </form>
+      </nav>
     </div>
+  </header>
 
-    <!-- ===== GRADE ===== -->
-    <div class="grid" id="gridCards"></div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-container">
+      <div>
+        <a href="#" class="announcement">
+          LABTIF Connect - Join to Discord Community
+          <span class="announcement-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </span>
+        </a>
+      </div>
 
-    <!-- ===== MODAL ===== -->
-    <div class="modal" id="modalDetalhes">
-        <div class="modal-conteudo">
-            <span class="fechar" onclick="fecharModal()">&times;</span>
-            <h2 id="modalTitulo"></h2>
-            <img id="modalCapa" src="" alt="Capa" />
-            <div id="modalInfo" class="detalhe"></div>
-            <div id="modalGeneros" class="generos-list"></div>
-            <p id="modalSinopse" class="sinopse"></p>
-            <a id="modalLink" href="#" target="_blank" class="btn-telegram">📺 Assistir / Baixar no Telegram</a>
-        </div>
+      <h1 class="hero-title">
+        Let's Watch <span class="text-gradient">Together</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Selamat datang di Labtif Movie – katalog film karya mahasiswa.
+        Jelajahi berbagai genre, temukan cerita unik, dan saksikan kreativitas
+        tanpa batas dalam setiap tayangan.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#" class="btn-started">
+          Let's Start
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
+        <button class="btn-install">
+          Labtif Movie
+          <span class="btn-icon">
+            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+              width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd"
+                d="M19.003 3A2 2 0 0 1 21 5v2h-2V5.414L17.414 7h-2.828l2-2h-2.172l-2 2H9.586l2-2H9.414l-2 2H3V5a2 2 0 0 1 2-2h14.003ZM3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H3Zm2-2.414L6.586 5H5v1.586Zm4.553 4.52a1 1 0 0 1 1.047.094l4 3a1 1 0 0 1 0 1.6l-4 3A1 1 0 0 1 9 18v-6a1 1 0 0 1 .553-.894Z"
+                clip-rule="evenodd" />
+            </svg>
+          </span>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ============================================================
-        // JAVASCRIPT
-        // ============================================================
+  <!-- Card Content Movie -->
 
-        let dados = [];
-        let categoriaAtual = 'todos';
+  <div class="card-grid">
+    <?php
+    require_once 'movie.php';
+    $movie = new Movie();
+    $datas = $movie->getAllMovies();
+    foreach ($datas as $data) {
+      ?>
+      <a class="card" href="crud/moviedetail.php?id=<?= "$data[id]" ?>">
+        <div class="card-image-container">
+          <img class="card-image" src="images/<?= "$data[cover] " ?>" />
+        </div>
 
-        // Carrega o arquivo dados.json
-        fetch('dados.json')
-            .then(resposta => {
-                if (!resposta.ok) throw new Error('Arquivo dados.json não encontrado!');
-                return resposta.json();
-            })
-            .then(dadosCarregados => {
-                dados = dadosCarregados;
-                exibirCards(dados);
-            })
-            .catch(erro => {
-                document.getElementById('gridCards').innerHTML =
-                    `<p class="sem-resultado">⚠️ Erro ao carregar dados: ${erro.message}<br><small>Verifique se o arquivo dados.json existe.</small></p>`;
-                console.error(erro);
-            });
+        <div class="card-content">
+          <h3 class="card-title"><?= "$data[title]" ?></h3>
+          <p class="card-description">
+            <?= "$data[description]" ?>
+          </p>
 
-        // ===== EXIBIR CARDS =====
-        function exibirCards(lista) {
-            const grid = document.getElementById('gridCards');
-            if (!lista || lista.length === 0) {
-                grid.innerHTML = '<p class="sem-resultado">😕 Nenhuma obra encontrada</p>';
-                return;
-            }
-            grid.innerHTML = lista.map(item => `
-                    <div class="card" onclick="abrirDetalhes(${item.id})">
-                        <img src="${item.capa}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/300x450/333/888?text=Sem+Capa'" />
-                        <div class="card-info">
-                            <h3>${item.nome}</h3>
-                            <p><span>${item.ano}</span> <span class="tag">${item.categoria}</span></p>
-                        </div>
-                    </div>
-                `).join('');
-        }
+          <div class="card-tags">
+            <span class="tag"><?= "$data[genre]" ?></span>
+          </div>
+        </div>
+      </a>
+      <?php
+    }
+    ?>
+  </div>
+  <!-- Footer -->
+  <footer class="custom-footer">
+    <div class="footer-container">
+      <div class="brand-container">
+        <a class="brand-link" href="#" aria-label="Brand">LABTIF Movie</a>
+      </div>
 
-        // ===== PESQUISAR =====
-        function pesquisar() {
-            const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
-            if (termo === '') {
-                aplicarFiltros();
-                return;
-            }
-            const resultados = dados.filter(item => {
-                const nomeMatch = item.nome.toLowerCase().includes(termo);
-                const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
-                const paisMatch = item.pais.toLowerCase().includes(termo);
-                const anoMatch = item.ano.toString().includes(termo);
-                return nomeMatch || generoMatch || paisMatch || anoMatch;
-            });
-            exibirCards(resultados);
-        }
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="crud/index.php">Movies</a>
+        </li>
+      </ul>
 
-        // ===== FILTRAR POR CATEGORIA =====
-        function filtrarCategoria(categoria, botao) {
-            categoriaAtual = categoria;
-            // Remove classe 'ativo' de todos os botões
-            document.querySelectorAll('#filtrosCategoria button').forEach(btn => btn.classList.remove('ativo'));
-            if (botao) botao.classList.add('ativo');
-            aplicarFiltros();
-        }
+      <div class="social-icons">
+        <a class="social-icon" href="https://www.instagram.com/labtif.unsur/">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z" />
+          </svg>
+        </a>
+        <a class="social-icon" href="#">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd"
+              d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Zm5-3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H8Zm7.597 2.214a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2h-.01a1 1 0 0 1-1-1ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"
+              clip-rule="evenodd" />
+          </svg>
+        </a>
+        <a class="social-icon" href="https://github.com/unsur-labtif">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
 
-        // ===== APLICAR FILTROS + PESQUISA =====
-        function aplicarFiltros() {
-            let listaFiltrada = dados;
-            if (categoriaAtual !== 'todos') {
-                listaFiltrada = dados.filter(item => item.categoria === categoriaAtual);
-            }
-            const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
-            if (termo !== '') {
-                listaFiltrada = listaFiltrada.filter(item => {
-                    const nomeMatch = item.nome.toLowerCase().includes(termo);
-                    const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
-                    const paisMatch = item.pais.toLowerCase().includes(termo);
-                    const anoMatch = item.ano.toString().includes(termo);
-                    return nomeMatch || generoMatch || paisMatch || anoMatch;
-                });
-            }
-            exibirCards(listaFiltrada);
-        }
-
-        // ===== ABRIR MODAL COM DETALHES =====
-        function abrirDetalhes(id) {
-            const item = dados.find(d => d.id === id);
-            if (!item) return;
-
-            document.getElementById('modalTitulo').textContent = item.nome;
-            document.getElementById('modalCapa').src = item.capa;
-            document.getElementById('modalCapa').onerror = function() {
-                this.src = 'https://via.placeholder.com/300x450/333/888?text=Sem+Capa';
-            };
-
-            const infoHTML = `
-                    <p><strong>📅 Ano:</strong> ${item.ano}</p>
-                    <p><strong>🌍 País:</strong> ${item.pais}</p>
-                    <p><strong>📺 Temporadas:</strong> ${item.temporadas}</p>
-                    <p><strong>🎬 Episódios:</strong> ${item.episodios}</p>
-                    <p><strong>🔊 Áudio:</strong> ${item.audio}</p>
-                    <p><strong>📡 Qualidade:</strong> ${item.qualidade}</p>
-                    <p><strong>📌 Status:</strong> ${item.status}</p>
-                `;
-            document.getElementById('modalInfo').innerHTML = infoHTML;
-
-            const generosHTML = item.generos.map(g => `<span>${g}</span>`).join('');
-            document.getElementById('modalGeneros').innerHTML = generosHTML;
-
-            document.getElementById('modalSinopse').textContent = item.sinopse;
-            document.getElementById('modalLink').href = item.link_telegram;
-
-            document.getElementById('modalDetalhes').style.display = 'flex';
-        }
-
-        // ===== FECHAR MODAL =====
-        function fecharModal() {
-            document.getElementById('modalDetalhes').style.display = 'none';
-        }
-
-        // Fechar modal clicando fora
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalDetalhes');
-            if (event.target === modal) {
-                fecharModal();
-            }
-        };
-    </script>
-
+  <script>
+    const toggle = document.querySelector(".nav-toggle");
+    const menu = document.querySelector(".nav-menu");
+    toggle.addEventListener("click", () => {
+      menu.classList.toggle("active");
+    });
+  </script>
 </body>
+
 </html>
