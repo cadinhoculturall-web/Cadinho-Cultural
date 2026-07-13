@@ -1,176 +1,876 @@
-<?php
-$is_logged_in = isset($_SESSION['email']);
-require_once "auth/Session.php";
-
-$s = new Session();
-
-if(isset($_POST['logout'])){
-  session_destroy();
-  header("location:index.php");
-  exit;
-}
-
-?>
-
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CC Flix</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadinho Cultural - Catálogo</title>
+    <style>
+        /* ========== CORES E TEMA ========== */
+        :root {
+            --dourado: #d4a843;
+            --dourado-escuro: #b8922f;
+            --fundo: #0f0f0f;
+            --card: #1a1a1a;
+            --texto: #fff;
+            --texto-claro: #aaa;
+            --borda: #333;
+            --header-bg: rgba(15, 15, 15, 0.95);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --fundo: #f5f0e8;
+                --card: #ffffff;
+                --texto: #1a1a1a;
+                --texto-claro: #666;
+                --borda: #ddd;
+                --header-bg: rgba(245, 240, 232, 0.95);
+            }
+        }
+
+        /* ========== RESET ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--fundo);
+            color: var(--texto);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--borda);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dourado);
+            text-decoration: none;
+        }
+
+        .logo-text span {
+            color: var(--texto);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--texto-claro);
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-menu a:hover {
+            color: var(--dourado);
+        }
+
+        .btn-login,
+        .btn-register {
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .btn-login {
+            border: 2px solid var(--dourado);
+            color: var(--dourado) !important;
+        }
+
+        .btn-login:hover {
+            background: var(--dourado);
+            color: #1a1a1a !important;
+        }
+
+        .btn-register {
+            background: var(--dourado);
+            color: #1a1a1a !important;
+        }
+
+        .btn-register:hover {
+            background: var(--dourado-escuro);
+        }
+
+        /* Menu hambúrguer */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .bar {
+            width: 28px;
+            height: 3px;
+            background: var(--texto);
+            border-radius: 3px;
+            transition: 0.3s;
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            padding: 60px 20px 40px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--fundo) 0%, transparent 100%);
+        }
+
+        .hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .announcement {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: var(--texto-claro);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid var(--borda);
+            margin-bottom: 30px;
+            transition: 0.3s;
+        }
+
+        .announcement:hover {
+            border-color: var(--dourado);
+            color: var(--dourado);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--dourado), #f5d97e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--texto-claro);
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-started {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            background: var(--dourado);
+            color: #1a1a1a;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-started:hover {
+            background: var(--dourado-escuro);
+            transform: scale(1.03);
+        }
+
+        .btn-install {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--texto);
+            border: 2px solid var(--borda);
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-install:hover {
+            border-color: var(--dourado);
+            color: var(--dourado);
+        }
+
+        /* ========== SEARCH ========== */
+        .search-section {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 50px;
+            border: 2px solid var(--borda);
+            background: var(--card);
+            color: var(--texto);
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--dourado);
+            box-shadow: 0 0 20px rgba(212, 168, 67, 0.15);
+        }
+
+        .search-box input::placeholder {
+            color: var(--texto-claro);
+        }
+
+        .search-box button {
+            padding: 14px 30px;
+            border-radius: 50px;
+            border: none;
+            background: var(--dourado);
+            color: #1a1a1a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .search-box button:hover {
+            background: var(--dourado-escuro);
+        }
+
+        /* ========== FILTROS ========== */
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .filtros button {
+            padding: 8px 22px;
+            border-radius: 30px;
+            border: 2px solid var(--borda);
+            background: transparent;
+            color: var(--texto-claro);
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .filtros button:hover {
+            border-color: var(--dourado);
+            color: var(--texto);
+        }
+
+        .filtros button.ativo {
+            background: var(--dourado);
+            border-color: var(--dourado);
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        /* ========== GRADE DE CARDS ========== */
+        .card-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 28px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: var(--texto);
+            transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--dourado);
+            box-shadow: 0 12px 35px rgba(212, 168, 67, 0.2);
+        }
+
+        .card-image-container {
+            width: 100%;
+            padding-top: 150%;
+            position: relative;
+            background: var(--borda);
+        }
+
+        .card-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-description {
+            font-size: 0.85rem;
+            color: var(--texto-claro);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: var(--dourado);
+            color: #1a1a1a;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .modal-conteudo {
+            background: var(--card);
+            max-width: 600px;
+            width: 100%;
+            padding: 35px;
+            border-radius: 20px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid var(--dourado);
+        }
+
+        .modal-conteudo .fechar {
+            position: absolute;
+            top: 12px;
+            right: 22px;
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: var(--texto);
+            transition: 0.3s;
+        }
+
+        .modal-conteudo .fechar:hover {
+            color: var(--dourado);
+            transform: rotate(90deg);
+        }
+
+        .modal-conteudo h2 {
+            color: var(--dourado);
+            margin-bottom: 12px;
+            padding-right: 30px;
+        }
+
+        .modal-conteudo .detalhe {
+            margin: 4px 0;
+            color: var(--texto-claro);
+        }
+
+        .modal-conteudo .detalhe strong {
+            color: var(--texto);
+        }
+
+        .modal-conteudo .sinopse {
+            margin: 15px 0 20px;
+            line-height: 1.6;
+            color: var(--texto-claro);
+        }
+
+        .btn-telegram {
+            display: inline-block;
+            background: var(--dourado);
+            color: #1a1a1a;
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .btn-telegram:hover {
+            background: var(--dourado-escuro);
+        }
+
+        .generos-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0 15px;
+        }
+
+        .generos-list span {
+            background: var(--fundo);
+            color: var(--texto);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid var(--borda);
+        }
+
+        .modal-conteudo img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin: 10px 0 15px;
+            background: var(--fundo);
+        }
+
+        /* ========== FOOTER ========== */
+        .custom-footer {
+            border-top: 1px solid var(--borda);
+            padding: 40px 20px;
+            background: var(--card);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand-link {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dourado);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            color: var(--texto-claro);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--dourado);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .social-icon {
+            color: var(--texto-claro);
+            transition: 0.3s;
+            width: 24px;
+            height: 24px;
+        }
+
+        .social-icon:hover {
+            color: var(--dourado);
+        }
+
+        /* ========== RESPONSIVO ========== */
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 20px 0;
+                gap: 16px;
+                align-items: center;
+                border-top: 1px solid var(--borda);
+                margin-top: 16px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+        }
+
+        .sem-resultado {
+            color: var(--texto-claro);
+            text-align: center;
+            width: 100%;
+            font-size: 1.5rem;
+            padding: 50px 0;
+            grid-column: 1 / -1;
+        }
+    </style>
 </head>
-
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="nav-container">
-      <div class="nav-left">
-        <a href="#"><span class="logo-text">LABTIF Movie</span></a>
-      </div>
-      <button class="nav-toggle" aria-label="Toggle navigation">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </button>
-      <nav class="nav-menu">
-        <a href="#">Home</a>
-        <a href="crud/index.php">Movies</a>
-        <a href="auth/loginForm.php" class="btn-login">Login</a>
-        <a href="auth/registerForm.php" class="btn-register">Register</a>
-        <form action="" method="post">
-          <button type="submit" name="logout" class="btn-logout">Logout</button>
-        </form>
-      </nav>
-    </div>
-  </header>
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-container">
-      <div>
-        <a href="#" class="announcement">
-          LABTIF Connect - Join to Discord Community
-          <span class="announcement-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </span>
-        </a>
-      </div>
-
-      <h1 class="hero-title">
-        Let's Watch <span class="text-gradient">Together</span>
-      </h1>
-
-      <p class="hero-subtitle">
-        Selamat datang di Labtif Movie – katalog film karya mahasiswa.
-        Jelajahi berbagai genre, temukan cerita unik, dan saksikan kreativitas
-        tanpa batas dalam setiap tayangan.
-      </p>
-
-      <div class="hero-buttons">
-        <a href="#" class="btn-started">
-          Let's Start
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="m9 18 6-6-6-6" />
-          </svg>
-        </a>
-        <button class="btn-install">
-          Labtif Movie
-          <span class="btn-icon">
-            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-              width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-              <path fill-rule="evenodd"
-                d="M19.003 3A2 2 0 0 1 21 5v2h-2V5.414L17.414 7h-2.828l2-2h-2.172l-2 2H9.586l2-2H9.414l-2 2H3V5a2 2 0 0 1 2-2h14.003ZM3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H3Zm2-2.414L6.586 5H5v1.586Zm4.553 4.52a1 1 0 0 1 1.047.094l4 3a1 1 0 0 1 0 1.6l-4 3A1 1 0 0 1 9 18v-6a1 1 0 0 1 .553-.894Z"
-                clip-rule="evenodd" />
-            </svg>
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card Content Movie -->
-
-  <div class="card-grid">
-    <?php
-    require_once 'movie.php';
-    $movie = new Movie();
-    $datas = $movie->getAllMovies();
-    foreach ($datas as $data) {
-      ?>
-      <a class="card" href="crud/moviedetail.php?id=<?= "$data[id]" ?>">
-        <div class="card-image-container">
-          <img class="card-image" src="images/<?= "$data[cover] " ?>" />
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="#" class="logo-text">Cadinho <span>Cultural</span></a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <nav class="nav-menu">
+                <a href="#">Home</a>
+                <a href="#">Catálogo</a>
+                <a href="#" class="btn-login">Login</a>
+                <a href="#" class="btn-register">Cadastrar</a>
+            </nav>
         </div>
+    </header>
 
-        <div class="card-content">
-          <h3 class="card-title"><?= "$data[title]" ?></h3>
-          <p class="card-description">
-            <?= "$data[description]" ?>
-          </p>
+    <!-- ===== HERO ===== -->
+    <div class="hero">
+        <div class="hero-container">
+            <a href="#" class="announcement">
+                🎬 Cadinho Cultural - Catálogo de Conteúdos
+                <span class="announcement-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </span>
+        </a>
+        <h1 class="hero-title">
+            Assista <span class="text-gradient">Com a Gente</span>
+        </h1>
+        <p class="hero-subtitle">
+            Explore nosso catálogo com séries, doramas, filmes, animes e muito mais.
+            Tudo organizado para você encontrar facilmente o que deseja assistir.
+        </p>
+        <div class="hero-buttons">
+            <a href="#" class="btn-started">
+                Explorar Catálogo
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6" />
+            </svg>
+        </a>
+    </div>
+</div>
+</div>
 
-          <div class="card-tags">
-            <span class="tag"><?= "$data[genre]" ?></span>
-          </div>
-        </div>
-      </a>
-      <?php
-    }
-    ?>
-  </div>
-  <!-- Footer -->
-  <footer class="custom-footer">
+<!-- ===== SEARCH ===== -->
+<div class="search-section">
+    <div class="search-box">
+        <input type="text" id="inputBusca" placeholder="🔍 Pesquise por nome, gênero, ano..." onkeyup="if(event.key === 'Enter') pesquisar()">
+        <button onclick="pesquisar()">Buscar</button>
+    </div>
+</div>
+
+<!-- ===== FILTROS ===== -->
+<div class="filtros" id="filtrosCategoria">
+    <button onclick="filtrarCategoria('todos', this)" class="ativo">Todos</button>
+    <button onclick="filtrarCategoria('Séries', this)">Séries</button>
+    <button onclick="filtrarCategoria('Doramas', this)">Doramas</button>
+    <button onclick="filtrarCategoria('Filmes', this)">Filmes</button>
+    <button onclick="filtrarCategoria('Minisséries', this)">Minisséries</button>
+    <button onclick="filtrarCategoria('Novelas', this)">Novelas</button>
+    <button onclick="filtrarCategoria('Desenhos', this)">Desenhos</button>
+    <button onclick="filtrarCategoria('Animes', this)">Animes</button>
+</div>
+
+<!-- ===== GRADE DE CARDS ===== -->
+<div class="card-grid" id="gridCards"></div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal" id="modalDetalhes">
+    <div class="modal-conteudo">
+        <span class="fechar" onclick="fecharModal()">&times;</span>
+        <h2 id="modalTitulo"></h2>
+        <img id="modalCapa" src="" alt="Capa" />
+        <div id="modalInfo" class="detalhe"></div>
+        <div id="modalGeneros" class="generos-list"></div>
+        <p id="modalSinopse" class="sinopse"></p>
+        <a id="modalLink" href="#" target="_blank" class="btn-telegram">📺 Assistir / Baixar no Telegram</a>
+    </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="custom-footer">
     <div class="footer-container">
-      <div class="brand-container">
-        <a class="brand-link" href="#" aria-label="Brand">LABTIF Movie</a>
-      </div>
-
-      <ul class="nav-links">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="crud/index.php">Movies</a>
-        </li>
-      </ul>
-
-      <div class="social-icons">
-        <a class="social-icon" href="https://www.instagram.com/labtif.unsur/">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z" />
-          </svg>
-        </a>
-        <a class="social-icon" href="#">
-          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd"
-              d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Zm5-3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H8Zm7.597 2.214a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2h-.01a1 1 0 0 1-1-1ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"
-              clip-rule="evenodd" />
-          </svg>
-        </a>
-        <a class="social-icon" href="https://github.com/unsur-labtif">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-          </svg>
-        </a>
-      </div>
+        <a class="brand-link" href="#">Cadinho Cultural</a>
+        <ul class="nav-links">
+            <li><a class="nav-link" href="#">Home</a></li>
+            <li><a class="nav-link" href="#">Catálogo</a></li>
+        </ul>
+        <div class="social-icons">
+            <a class="social-icon" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z" />
+                </svg>
+            </a>
+            <a class="social-icon" href="#">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Zm5-3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H8Zm7.597 2.214a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2h-.01a1 1 0 0 1-1-1ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z" clip-rule="evenodd" />
+                </svg>
+            </a>
+            <a class="social-icon" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                </svg>
+            </a>
+        </div>
     </div>
-  </footer>
+</footer>
 
-  <script>
+<script>
+    // ===== JAVASCRIPT =====
+    let dados = [];
+    let categoriaAtual = 'todos';
+
+    // Menu hambúrguer
     const toggle = document.querySelector(".nav-toggle");
     const menu = document.querySelector(".nav-menu");
     toggle.addEventListener("click", () => {
-      menu.classList.toggle("active");
+        menu.classList.toggle("active");
     });
-  </script>
-</body>
 
+    // Carregar dados
+    fetch('dados.json')
+        .then(resposta => {
+            if (!resposta.ok) throw new Error('Arquivo dados.json não encontrado!');
+            return resposta.json();
+        })
+        .then(dadosCarregados => {
+            dados = dadosCarregados;
+            exibirCards(dados);
+        })
+        .catch(erro => {
+            document.getElementById('gridCards').innerHTML =
+                `<p class="sem-resultado">⚠️ Erro: ${erro.message}</p>`;
+            console.error(erro);
+        });
+
+    function exibirCards(lista) {
+        const grid = document.getElementById('gridCards');
+        if (!lista || lista.length === 0) {
+            grid.innerHTML = '<p class="sem-resultado">😕 Nenhuma obra encontrada</p>';
+            return;
+        }
+        grid.innerHTML = lista.map(item => `
+                <div class="card" onclick="abrirDetalhes(${item.id})">
+                    <div class="card-image-container">
+                        <img class="card-image" src="${item.capa}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/300x450/333/888?text=Sem+Capa'" />
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">${item.nome}</h3>
+                        <p class="card-description">${item.sinopse.substring(0, 80)}...</p>
+                        <div class="card-tags">
+                            <span class="tag">${item.categoria}</span>
+                            <span class="tag">${item.ano}</span>
+                            ${item.generos.slice(0, 2).map(g => `<span class="tag">${g}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    function pesquisar() {
+        const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
+        if (termo === '') { aplicarFiltros(); return; }
+        const resultados = dados.filter(item => {
+            const nomeMatch = item.nome.toLowerCase().includes(termo);
+            const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
+            const paisMatch = item.pais.toLowerCase().includes(termo);
+            const anoMatch = item.ano.toString().includes(termo);
+            return nomeMatch || generoMatch || paisMatch || anoMatch;
+        });
+        exibirCards(resultados);
+    }
+
+    function filtrarCategoria(categoria, botao) {
+        categoriaAtual = categoria;
+        document.querySelectorAll('#filtrosCategoria button').forEach(btn => btn.classList.remove('ativo'));
+        if (botao) botao.classList.add('ativo');
+        aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+        let listaFiltrada = dados;
+        if (categoriaAtual !== 'todos') {
+            listaFiltrada = dados.filter(item => item.categoria === categoriaAtual);
+        }
+        const termo = document.getElementById('inputBusca').value.toLowerCase().trim();
+        if (termo !== '') {
+            listaFiltrada = listaFiltrada.filter(item => {
+                const nomeMatch = item.nome.toLowerCase().includes(termo);
+                const generoMatch = item.generos.some(g => g.toLowerCase().includes(termo));
+                const paisMatch = item.pais.toLowerCase().includes(termo);
+                const anoMatch = item.ano.toString().includes(termo);
+                return nomeMatch || generoMatch || paisMatch || anoMatch;
+            });
+        }
+        exibirCards(listaFiltrada);
+    }
+
+    function abrirDetalhes(id) {
+        const item = dados.find(d => d.id === id);
+        if (!item) return;
+        document.getElementById('modalTitulo').textContent = item.nome;
+        document.getElementById('modalCapa').src = item.capa;
+        document.getElementById('modalCapa').onerror = function() {
+            this.src = 'https://via.placeholder.com/300x450/333/888?text=Sem+Capa';
+        };
+        document.getElementById('modalInfo').innerHTML = `
+                <p><strong>📅 Ano:</strong> ${item.ano}</p>
+                <p><strong>🌍 País:</strong> ${item.pais}</p>
+                <p><strong>📺 Temporadas:</strong> ${item.temporadas}</p>
+                <p><strong>🎬 Episódios:</strong> ${item.episodios}</p>
+                <p><strong>🔊 Áudio:</strong> ${item.audio}</p>
+                <p><strong>📡 Qualidade:</strong> ${item.qualidade}</p>
+                <p><strong>📌 Status:</strong> ${item.status}</p>
+            `;
+        document.getElementById('modalGeneros').innerHTML = item.generos.map(g => `<span>${g}</span>`).join('');
+        document.getElementById('modalSinopse').textContent = item.sinopse;
+        document.getElementById('modalLink').href = item.link_telegram;
+        document.getElementById('modalDetalhes').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('modalDetalhes').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalDetalhes');
+        if (event.target === modal) fecharModal();
+    };
+</script>
+
+</body>
 </html>
