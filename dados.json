@@ -12,23 +12,22 @@
     "audio": "Português",
     "qualidade": "1080p",
     "sinopse": "Uma garota insegura usa maquiagem para esconder o rosto e se torna popular, mas acaba envolvida em um triângulo amoroso.",
-    "link_telegram": "https://t.me/+SEULINK",
+    "link_telegram": "https://t.me/c/2698848758/22727/33330",
     "status": "Completo"
   },
-  {
-    "id": 2,
-    "categoria": "Séries",
-    "nome": "Round 6",
-    "capa": "https://via.placeholder.com/300x450/1a1a1a/d4a843?text=Round+6",
-    "ano": 2021,
-    "pais": "Coreia do Sul",
-    "generos": ["Suspense", "Ação", "Drama"],
-    "temporadas": 1,
-    "episodios": 9,
-    "audio": "Coreano",
-    "qualidade": "4K",
-    "sinopse": "Centenas de pessoas endividadas aceitam um convite misterioso para competir em jogos infantis.",
-    "link_telegram": "https://t.me/+SEULINK",
-    "status": "Completo"
   }
 ]
+{
+  "id": 3,
+  "categoria": "Séries",
+  "nome": "Instituto Voltaire",
+  "capa": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYUlOAhGnyVpQGLOmosmxHIcxWEfJ_Mct325LTy6MvH1uqGiBPhREYUM4&s=10",
+  "ano": 2021,
+  "pais": "França",
+  "idioma": "Português",
+  "temporadas": 1,
+  "episodios": 8,
+  "generos": ["Drama"],
+  "sinopse": "É o primeiro dia de aula no Instituto Voltaire, em 1963. Pela primeira vez, meninas e meninos estudam juntos na escola, dando início a uma experiência inédita que desafia costumes da época. Entre amizades, romances, conflitos e mudanças sociais, professores e alunos precisam aprender a conviver em um ambiente repleto de descobertas.",
+  "status": "Completa"
+}
